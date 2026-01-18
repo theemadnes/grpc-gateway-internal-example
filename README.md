@@ -28,7 +28,39 @@ kubectl apply -f gateway-resources
 # you can check the status via 
 kubectl -n demo-gateway get gateway internal-http
 
-# once the ADDRESS field is populated, lets capture it to call it later
-
-
 ```
+
+### client access
+```
+# once the ADDRESS field is populated, lets capture it to call it later
+# the output will look someting like this
+# $ kubectl -n demo-gateway get gateway internal-http
+# NAME            CLASS         ADDRESS        PROGRAMMED   AGE
+# internal-http   gke-l7-rilb   10.128.0.117   True         112s
+
+# if you're using a workstation with IP connectivity to the range the ALB is using, just capture it to a variable
+export GATEWAY_IP=$(kubectl get gateway internal-http -n demo-gateway -o jsonpath='{.status.addresses[0].value}')
+echo $GATEWAY_IP
+
+# from a folder with whereami.proto (or navigating to it manually) run grpcurl
+grpcurl -plaintext -proto whereami.proto $GATEWAY_IP:80 whereami.Whereami.GetPayload
+```
+
+Expected output:
+
+```$grpcurl -plaintext -proto whereami.proto $GATEWAY_IP:80 whereami.Whereami.GetPayload
+{
+  "clusterName": "edge-to-mesh-01",
+  "metadata": "grpc-frontend",
+  "nodeName": "gk3-edge-to-mesh-01-nap-1c08r7is-873c2a55-taeb",
+  "podIp": "10.54.1.165",
+  "podName": "whereami-grpc-585d8f95f9-m4b6g",
+  "podNameEmoji": "Ⓜ",
+  "podNamespace": "demo-whereami",
+  "podServiceAccount": "whereami-grpc",
+  "projectId": "e2m-private-test-01",
+  "timestamp": "2026-01-18T10:41:24",
+  "zone": "us-central1-a",
+  "gceInstanceId": "4799585712519873663",
+  "gceServiceAccount": "e2m-private-test-01.svc.id.goog"
+}```
