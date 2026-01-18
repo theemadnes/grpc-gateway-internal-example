@@ -1,0 +1,23 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: whereami-grpc-route
+  namespace: demo-whereami
+spec:
+  parentRefs:
+  - group: gateway.networking.k8s.io
+    sectionName: http
+    name: internal-http # Name of your GKE Gateway
+    namespace: demo-gateway
+    kind: Gateway
+  #hostnames:
+  #  - "frontend.endpoints.e2m-private-test-01.cloud.goog" # replace with your hostname
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        #value: / # Matches all methods of whereami.Whereami
+        value: /whereami.Whereami    
+    backendRefs:
+    - name: whereami-grpc # Name of your Kubernetes Service for the gRPC backend
+      port: 9090 # Port of your gRPC service

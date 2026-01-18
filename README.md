@@ -7,7 +7,7 @@ Prerequisites:
 
 - GKE cluster with the [Gateway controller](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/deploying-gateways#enable-gateway) enabled 
 - the GKE cluster nodes must have the ability to call to an external, Google-managed Artifact Registry (used to pull the image used for the demo app)
-- because the load balancer created will be a regional, internal application load balancer, the VPC must have a [proxy-only subnet](https://docs.cloud.google.com/load-balancing/docs/proxy-only-subnets) created 
+- because the load balancer created will be a regional, internal application load balancer (using the `gke-l7-rilb` `gatewayClass`), the VPC must have a [proxy-only subnet](https://docs.cloud.google.com/load-balancing/docs/proxy-only-subnets) created 
 - have some VM (or workstation) within your dev environment that has [grpcurl](https://github.com/fullstorydev/grpcurl) installed that has connectivity to the node subnet used by the GKE cluster (the VIP used by the load balancer will, by default, pull from the node range)
 
 ### setup
@@ -18,9 +18,17 @@ Prerequisites:
 # create namespaces
 kubectl apply -f k8s-namespaces
 
+# deploy whereami app in gRPC mode, listening on port 9090 on local mode (but load balancer will expose on port 80)
+kubectl apply -f whereami
 
+# deploy gateway, httproute, and gRPC healthcheck for whereami (check the namespaces to see where each resource is deployed)
+kubectl apply -f gateway-resources
 
+# it will take a few minutes to create the load balancer via the gateway resource
+# you can check the status via 
+kubectl -n demo-gateway get gateway internal-http
 
+# once the ADDRESS field is populated, lets capture it to call it later
 
 
 ```
