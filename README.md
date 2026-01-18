@@ -1,6 +1,8 @@
 # grpc-gateway-internal-example
 super simple use of a gRPC service behind a managed, internal ALB on Google Cloud
 
+This setup will use *plaintext* both between the client and the load balancer (over port 80) and plaintext (using h2c, configured via the service's `appProtocol` field) between the load balancer and the backend gRPC service. You are welcome to adapt this code to enable TLS termination at the load balancer layer if your situation dictates, but that's up to you. 
+
 Prerequisites:
 
 - GKE cluster with the [Gateway controller](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/deploying-gateways#enable-gateway) enabled 
